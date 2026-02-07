@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ game[0] }} vs {{ game[1] }} - Odds</title>
+</head>
+<body>
+    <h1>{{ game[0] }} vs {{ game[1] }}</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Sportsbook</th>
+                <th>Home ML</th>
+                <th>Away ML</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for odd in odds %}
+            <tr>
+                <td>{{ odd[6] }}</td>
+                <td>{{ odd[3] }}</td>
+                <td>{{ odd[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

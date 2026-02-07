@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NBA Odds Tracker</title>
+</head>
+<body>
+    <a href="/odds" style="text-decoration: none;">
+    <button>🔄 Update Odds</button>
+    </a>
+    <table>
+        <thead>
+            <tr>
+                <th>Home Team</th>
+                <th>Away Team</th>
+                <th>Date/Time</th>
+                <th>Odds</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for game in games %}
+            <tr>
+                <td>{{game[2]}}</td>
+                <td>{{game[3]}}</td>
+                <td>{{game[4]}}</td>
+                <td><a href="/game/{{ game[0] }}">View Odds</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
