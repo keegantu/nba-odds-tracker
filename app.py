@@ -135,8 +135,43 @@ def game_odds(id):
             (id,)
         )
         odds_rows = cursor.fetchall()
+
+        for row in odds_rows:
+            print(f"Sportsbook: {row[6]}, Home: {row[3]}, Away: {row[4]}")
         
-        return render_template("game_odds.html", game=game, odds=odds_rows)
+        converted_odds = []
+        for row in odds_rows:
+            home_decimal = row[3]
+            away_decimal = row[4]
+            
+            # Convert home odds
+            try:
+                if home_decimal < 2.0:
+                    home_american = int(-100 / (home_decimal - 1))
+                else:
+                    home_american = int((home_decimal - 1) * 100)
+                    home_american = f"+{home_american}"
+            except ZeroDivisionError:
+                home_american = 0  # Or skip this row, or use original value
+            
+            # Convert away odds
+            try:
+                if away_decimal < 2.0:
+                    away_american = int(-100 / (away_decimal - 1))
+                else:
+                    away_american = int((away_decimal - 1) * 100)
+                    away_american = f"+{away_american}"
+            except ZeroDivisionError:
+                away_american = 0
+    
+            converted_row = list(row)
+            converted_row[3] = home_american
+            converted_row[4] = away_american
+            converted_odds.append(converted_row)
+
+
+        
+        return render_template("game_odds.html", game=game, odds=converted_odds)
     except Exception as error:
         return f"Error: {error}"
     finally:
