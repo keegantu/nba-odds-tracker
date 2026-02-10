@@ -31,9 +31,6 @@ def odds():
         response = requests.get(url)
         data = response.json()
 
-        response = requests.get(url)
-        data = response.json()
-
     
         cursor.execute("DELETE FROM odds")
         cursor.execute("DELETE FROM games")
@@ -60,7 +57,6 @@ def odds():
                 )
                 db_game_id = cursor.fetchone()[0]
             
-            # Insert fresh odds for all bookmakers
             for bookmaker in game['bookmakers']:
                 book_name = bookmaker['title']
                 cursor.execute("SELECT id FROM sportsbooks WHERE name = %s", (book_name,))
@@ -68,8 +64,15 @@ def odds():
                 
                 if result:
                     sportsbook_id = result[0]
-                    home_price = bookmaker['markets'][0]['outcomes'][0]['price']
-                    away_price = bookmaker['markets'][0]['outcomes'][1]['price']
+                    outcomes = bookmaker['markets'][0]['outcomes']
+
+                    if outcomes[0]['name'] == home_team:
+                        home_price = outcomes[0]['price']
+                        away_price = outcomes[1]['price']
+                    else:
+                        home_price = outcomes[1]['price']
+                        away_price = outcomes[0]['price']
+                    
                     last_update = bookmaker['markets'][0]['last_update']
                     cursor.execute(
                         "INSERT INTO odds(game_id, sportsbook_id, home_ml, away_ml, scraped_at) VALUES (%s, %s, %s, %s, %s)",
