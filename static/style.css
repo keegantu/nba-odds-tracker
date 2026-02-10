@@ -1,0 +1,29 @@
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+h1 {
+    font-family: 'Courier New', monospace;
+    font-size: 2.5em;
+    color: #1d428a;
+    margin-bottom: 30px;
+}
+
+.games-table {
+    margin: 30px auto;
+    border-collapse: collapse;
+    width: 80%;
+    max-width: 900px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.update-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}

@@ -2,15 +2,16 @@
 <html>
 <head>
     <title>{{ game[0] }} vs {{ game[1] }} - Odds</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>{{ game[0] }} vs {{ game[1] }}</h1>
-    <table>
+    <table class ="games-table">
         <thead>
             <tr>
                 <th>Sportsbook</th>
-                <th>Home ML</th>
-                <th>Away ML</th>
+                <th>{{game [0]}} ML</th>
+                <th>{{game [1]}} ML</th>
             </tr>
         </thead>
         <tbody>

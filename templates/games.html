@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>NBA Odds Tracker</title>
+    <title>NBA Odds Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <h1>NBA Odds Tracker</h1>
+    
     <a href="/odds" style="text-decoration: none;">
-    <button>🔄 Update Odds</button>
+        <button class="update-btn">🔄 Update Odds</button>
     </a>
-    <table>
+    
+    <table class="games-table">
         <thead>
             <tr>
                 <th>Home Team</th>
@@ -19,10 +23,10 @@
         <tbody>
             {% for game in games %}
             <tr>
-                <td>{{game[2]}}</td>
-                <td>{{game[3]}}</td>
-                <td>{{game[4]}}</td>
-                <td><a href="/game/{{ game[0] }}">View Odds</a></td>
+                <td>{{ game[2] }}</td>
+                <td>{{ game[3] }}</td>
+                <td>{{ game[4] }}</td>
+                <td><a href="/game/{{ game[0] }}" class="view-odds-link">View Odds</a></td>
             </tr>
             {% endfor %}
         </tbody>

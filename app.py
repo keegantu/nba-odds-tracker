@@ -1,8 +1,10 @@
 import psycopg2
 import requests
-
+import pytz
 
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -103,7 +105,22 @@ def games():
             )
             rows = cursor.fetchall()
 
-            return render_template("games.html", games = rows)
+            formatted_games = []
+
+            for row in rows:
+                game_list = list(row)
+
+                utc_time = row[4]
+                
+                utc_zone = pytz.UTC
+                est_zone = pytz.timezone('US/Eastern')
+                utc_time = utc_zone.localize(utc_time)
+                est_time = utc_time.astimezone(est_zone)
+                
+                game_list[4] = est_time.strftime("%b %d, %I:%M %p")
+                formatted_games.append(game_list)
+
+            return render_template("games.html", games = formatted_games)
         except Exception as error:
             return f"Error: {error}"
         finally:
