@@ -1,3 +1,4 @@
+import os
 import psycopg2
 import requests
 import pytz
@@ -8,6 +9,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+ODDS_API_KEY = os.getenv("ODDS_API_KEY")
+
 @app.route("/")
 def home():
     return redirect(url_for('odds'))
@@ -17,7 +20,7 @@ def home():
 def odds():
     conn = None
     cursor = None
-    url = "https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey=859d56909fb14d5a3b972879e7e58b22&regions=us&markets=h2h"
+    url = f"https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={ODDS_API_KEY}&regions=us&markets=h2h"
     
     try:
         conn = psycopg2.connect(
@@ -131,6 +134,7 @@ def games():
                 cursor.close()
             if conn:
                 conn.close()
+                
 
 @app.route("/game/<int:id>")
 def game_odds(id):
