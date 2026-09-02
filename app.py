@@ -3,10 +3,13 @@ import psycopg2
 import requests
 import pytz
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 
+load_dotenv()
 
+database_url = os.getenv("DATABASE_URL")
 
 app = Flask(__name__)
 
@@ -14,7 +17,7 @@ ODDS_API_KEY = os.getenv("ODDS_API_KEY")
 
 @app.route("/")
 def home():
-    return redirect(url_for('odds'))
+    return redirect(url_for('games'))
 
 
 @app.route("/odds")
@@ -24,13 +27,12 @@ def odds():
     url = f"https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={ODDS_API_KEY}&regions=us&markets=h2h"
     
     try:
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
         
         response = requests.get(url)
         data = response.json()
 
-    
         cursor.execute("DELETE FROM odds")
         cursor.execute("DELETE FROM games")
         
@@ -40,16 +42,13 @@ def odds():
             api_game_id = game["id"]
             game_datetime = game["commence_time"]
 
-            # Check if game already exists
             cursor.execute("SELECT id FROM games WHERE game_id = %s", (api_game_id,))
             existing_game = cursor.fetchone()
             
             if existing_game:
                 db_game_id = existing_game[0]
-                # Delete old odds for this game
                 cursor.execute("DELETE FROM odds WHERE game_id = %s", (db_game_id,))
             else:
-                # Insert new game
                 cursor.execute(    
                     "INSERT INTO games(game_id, home_team, away_team, game_datetime, game_status) VALUES (%s, %s, %s, %s, %s) RETURNING id",
                     (api_game_id, home_team, away_team, game_datetime, 'upcoming')
@@ -90,41 +89,38 @@ def odds():
 
 @app.route("/games")
 def games():
-        conn = None
-        cursor = None
+    conn = None
+    cursor = None
 
-        try:
-            conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-            cursor = conn.cursor()
+    try:
+        conn = psycopg2.connect(database_url)
+        cursor = conn.cursor()
 
-            cursor.execute(
-                "SELECT * FROM games"
-            )
-            rows = cursor.fetchall()
+        cursor.execute("SELECT * FROM games")
+        rows = cursor.fetchall()
 
-            formatted_games = []
+        formatted_games = []
 
-            for row in rows:
-                game_list = list(row)
+        for row in rows:
+            game_list = list(row)
+            utc_time = row[4]
+            
+            utc_zone = pytz.UTC
+            est_zone = pytz.timezone('US/Eastern')
+            utc_time = utc_zone.localize(utc_time)
+            est_time = utc_time.astimezone(est_zone)
+            
+            game_list[4] = est_time.strftime("%b %d, %I:%M %p")
+            formatted_games.append(game_list)
 
-                utc_time = row[4]
-                
-                utc_zone = pytz.UTC
-                est_zone = pytz.timezone('US/Eastern')
-                utc_time = utc_zone.localize(utc_time)
-                est_time = utc_time.astimezone(est_zone)
-                
-                game_list[4] = est_time.strftime("%b %d, %I:%M %p")
-                formatted_games.append(game_list)
-
-            return render_template("games.html", games = formatted_games)
-        except Exception as error:
-            return f"Error: {error}"
-        finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
+        return render_template("games.html", games=formatted_games)
+    except Exception as error:
+        return f"Error: {error}"
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
                 
 
 @app.route("/game/<int:id>")
@@ -133,11 +129,10 @@ def game_odds(id):
     cursor = None
     
     try:
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
 
-        cursor.execute(
-            "SELECT home_team, away_team FROM games WHERE id = %s", (id,))
+        cursor.execute("SELECT home_team, away_team FROM games WHERE id = %s", (id,))
         game = cursor.fetchone()
 
         cursor.execute(
@@ -146,31 +141,24 @@ def game_odds(id):
         )
         odds_rows = cursor.fetchall()
 
-        for row in odds_rows:
-            print(f"Sportsbook: {row[6]}, Home: {row[3]}, Away: {row[4]}")
-        
         converted_odds = []
         for row in odds_rows:
             home_decimal = row[3]
             away_decimal = row[4]
             
-            # Convert home odds
             try:
                 if home_decimal < 2.0:
                     home_american = int(-100 / (home_decimal - 1))
                 else:
-                    home_american = int((home_decimal - 1) * 100)
-                    home_american = f"+{home_american}"
+                    home_american = f"+{int((home_decimal - 1) * 100)}"
             except ZeroDivisionError:
-                home_american = 0  # Or skip this row, or use original value
+                home_american = 0
             
-            # Convert away odds
             try:
                 if away_decimal < 2.0:
                     away_american = int(-100 / (away_decimal - 1))
                 else:
-                    away_american = int((away_decimal - 1) * 100)
-                    away_american = f"+{away_american}"
+                    away_american = f"+{int((away_decimal - 1) * 100)}"
             except ZeroDivisionError:
                 away_american = 0
     
@@ -179,8 +167,6 @@ def game_odds(id):
             converted_row[4] = away_american
             converted_odds.append(converted_row)
 
-
-        
         return render_template("game_odds.html", game=game, odds=converted_odds)
     except Exception as error:
         return f"Error: {error}"
@@ -192,8 +178,3 @@ def game_odds(id):
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
-
-    
-
-
-     
