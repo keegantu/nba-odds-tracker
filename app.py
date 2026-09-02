@@ -6,9 +6,6 @@ import pytz
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 
-database_url = os.getenv("DATABASE_URL")
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 
 app = Flask(__name__)
@@ -27,7 +24,7 @@ def odds():
     url = f"https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={ODDS_API_KEY}&regions=us&markets=h2h"
     
     try:
-        conn = psycopg2.connect(database_url)
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
         cursor = conn.cursor()
         
         response = requests.get(url)
@@ -97,7 +94,7 @@ def games():
         cursor = None
 
         try:
-            conn = psycopg2.connect(database_url)
+            conn = psycopg2.connect(os.getenv("DATABASE_URL"))
             cursor = conn.cursor()
 
             cursor.execute(
@@ -136,7 +133,7 @@ def game_odds(id):
     cursor = None
     
     try:
-        conn = psycopg2.connect(database_url)
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
         cursor = conn.cursor()
 
         cursor.execute(
