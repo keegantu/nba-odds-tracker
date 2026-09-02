@@ -23,12 +23,7 @@ def odds():
     url = f"https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={ODDS_API_KEY}&regions=us&markets=h2h"
     
     try:
-        conn = psycopg2.connect(
-            dbname="nba_odds_tracker",
-            user="keegantu",
-            host="localhost",
-            port="5432"
-        )
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
         cursor = conn.cursor()
         
         response = requests.get(url)
