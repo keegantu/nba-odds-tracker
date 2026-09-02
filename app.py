@@ -23,7 +23,7 @@ def odds():
     url = f"https://api.the-odds-api.com/v4/sports/basketball_nba/odds/?apiKey={ODDS_API_KEY}&regions=us&markets=h2h"
     
     try:
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        conn = psycopg2.connect(os.getenv("postgresql://postgres:GNypafPnhMeRgQRfLwpHcjzTKEhwcgVj@postgres.railway.internal:5432/railway"))
         cursor = conn.cursor()
         
         response = requests.get(url)
@@ -93,7 +93,7 @@ def games():
         cursor = None
 
         try:
-            conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+            conn = psycopg2.connect(os.getenv("postgresql://postgres:GNypafPnhMeRgQRfLwpHcjzTKEhwcgVj@postgres.railway.internal:5432/railway"))
             cursor = conn.cursor()
 
             cursor.execute(
@@ -132,7 +132,7 @@ def game_odds(id):
     cursor = None
     
     try:
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        conn = psycopg2.connect(os.getenv("postgresql://postgres:GNypafPnhMeRgQRfLwpHcjzTKEhwcgVj@postgres.railway.internal:5432/railway"))
         cursor = conn.cursor()
 
         cursor.execute(
