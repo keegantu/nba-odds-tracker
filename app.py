@@ -93,12 +93,7 @@ def games():
         cursor = None
 
         try:
-            conn = psycopg2.connect(
-                dbname="nba_odds_tracker",
-                user="keegantu",
-                host="localhost",
-                port="5432"
-            )
+            conn = psycopg2.connect(os.getenv("DATABASE_URL"))
             cursor = conn.cursor()
 
             cursor.execute(
@@ -137,12 +132,7 @@ def game_odds(id):
     cursor = None
     
     try:
-        conn = psycopg2.connect(
-            dbname="nba_odds_tracker",
-            user="keegantu",
-            host="localhost",
-            port="5432"
-        )
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
         cursor = conn.cursor()
 
         cursor.execute(
