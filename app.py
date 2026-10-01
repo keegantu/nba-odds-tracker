@@ -32,7 +32,6 @@ def odds():
         
         response = requests.get(url)
         data = response.json()
-        return str(data)
 
         cursor.execute("DELETE FROM odds")
         cursor.execute("DELETE FROM games")
